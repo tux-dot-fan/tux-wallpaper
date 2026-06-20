@@ -25,7 +25,8 @@ from fastapi import (
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 
-from tux_wallpaper.player.mpv_player import MpvPlayer, PlaybackState
+from tux_wallpaper.player.mpv_player import PlaybackState
+from tux_wallpaper.player.wallpaper_engine import WallpaperEngine
 from tux_wallpaper.service.db import Database
 from tux_wallpaper.service.models import (
     AppSettings,
@@ -64,7 +65,7 @@ app.add_middleware(
 
 # Global state (initialized on startup)
 _database: Optional[Database] = None
-_player: Optional[MpvPlayer] = None
+_player: Optional[WallpaperEngine] = None
 _remote_base_url: str = "http://localhost:18420"
 _http_client: Optional[httpx.AsyncClient] = None
 
@@ -81,7 +82,7 @@ def get_database() -> Database:
     return _database
 
 
-def get_player() -> MpvPlayer:
+def get_player() -> WallpaperEngine:
     """Dependency for player access."""
     if _player is None:
         raise RuntimeError("Player not initialized. Call startup event first.")
@@ -113,7 +114,7 @@ async def startup() -> None:
     data_dir.mkdir(parents=True, exist_ok=True)
 
     _database = Database(data_dir / "tux-wallpaper.db")
-    _player = MpvPlayer()
+    _player = WallpaperEngine()
     _http_client = httpx.AsyncClient(timeout=30.0)
 
     logger.info("Tux Wallpaper API started")
@@ -275,7 +276,7 @@ async def delete_wallpaper(
     summary="Get playback state",
 )
 async def get_playback_state(
-    player: MpvPlayer = Depends(get_player),
+    player: WallpaperEngine = Depends(get_player),
     db: Database = Depends(get_database),
 ) -> PlaybackStateModel:
     """Get current playback state."""
@@ -306,7 +307,7 @@ async def get_playback_state(
 )
 async def playback_command(
     command: PlaybackCommand,
-    player: MpvPlayer = Depends(get_player),
+    player: WallpaperEngine = Depends(get_player),
 ) -> SuccessResponse:
     """Send a playback command (play, pause, stop)."""
     if command.action == "play":
@@ -338,7 +339,7 @@ async def playback_command(
 )
 async def play_wallpaper(
     wallpaper_id: int,
-    player: MpvPlayer = Depends(get_player),
+    player: WallpaperEngine = Depends(get_player),
     db: Database = Depends(get_database),
 ) -> SuccessResponse:
     """Load and play a wallpaper video."""
@@ -392,15 +393,15 @@ async def get_player_settings(
 async def update_player_settings(
     settings: PlayerSettings,
     db: Database = Depends(get_database),
-    player: MpvPlayer = Depends(get_player),
+    player: WallpaperEngine = Depends(get_player),
 ) -> PlayerSettings:
     """Update player settings."""
     db.save_player_settings(settings)
 
     # Apply to running player
-    player.config.loop = settings.loop
-    player.config.mute = settings.mute
-    player.config.speed = settings.speed
+    player.set_loop(settings.loop)
+    player.set_mute(settings.mute)
+    player.set_speed(settings.speed)
 
     return settings
 
