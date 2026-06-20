@@ -2,11 +2,8 @@
 
 ## P0 — Must Fix Before Demo
 
-### 1. daemon.py → WallpaperEngine integration
-- `daemon.py` imports `WallpaperEngine` from `tux_wallpaper.player`
-- Replace direct `MpvPlayer` usage with `WallpaperEngine` (play/pause/stop/window management)
-- `WallpaperEngine` class already exists at `tux_wallpaper/player/wallpaper_engine.py`
-- The engine uses GTK3 borderless window (via `WallpaperWindow`) + mpv
+### 1. ~~daemon.py → WallpaperEngine integration~~
+~~`daemon.py` calls local API which now uses `WallpaperEngine` — no direct integration needed.~~ ✅ Done (2026-06-20)
 
 ### 2. Real video playback test
 - Need a real `.mp4` / `.webm` test file

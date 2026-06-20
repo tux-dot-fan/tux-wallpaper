@@ -48,9 +48,10 @@ tux-wallpaper
 - [x] **System tray** — `daemon.py` with tray icon and menu (graceful browser fallback)
 - [x] **Database** — SQLite via `service/db.py` with schema migrations
 - [x] **Unit tests** — 36 tests passing (`tests/unit/`)
+- [x] **WallpaperEngine in API** — playback endpoints use `WallpaperEngine` (auto window + player)
+- [x] **Settings UI** — loop/mute/hwdec/speed controls in Settings view
 
 ### 🔄 In Progress
-- [ ] **daemon.py integration** — connect `daemon.py` to `WallpaperEngine` (wallpaper_engine.py is written but daemon.py still uses old direct player calls)
 - [ ] **Real video test** — verify wallpaper displays correctly on live GNOME/Wayland desktop (cannot test via SSH)
 
 ### 📋 Planned
