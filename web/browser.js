@@ -17,6 +17,7 @@ const state = {
         loop: true,
         mute: true,
         hwdec: 'auto',
+        speed: 1.0,
         serverUrl: 'http://localhost:18420',
     },
     playbackState: {
@@ -58,6 +59,16 @@ async function apiPatch(path, body) {
 
 async function apiDelete(path) {
     const res = await fetch(`${API_BASE}${path}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    return res.json();
+}
+
+async function apiPut(path, body) {
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
     if (!res.ok) throw new Error(`API error: ${res.status}`);
     return res.json();
 }
@@ -215,11 +226,14 @@ async function loadSettings() {
             loop: playerSettings.loop,
             mute: playerSettings.mute,
             hwdec: playerSettings.hwdec,
+            speed: playerSettings.speed,
         };
 
         document.getElementById('setting-loop').checked = state.settings.loop;
         document.getElementById('setting-mute').checked = state.settings.mute;
         document.getElementById('setting-hwdec').value = state.settings.hwdec;
+        document.getElementById('setting-speed').value = state.settings.speed;
+        document.getElementById('speed-value').textContent = state.settings.speed.toFixed(1);
         document.getElementById('setting-server-url').value = state.settings.serverUrl;
     } catch (err) {
         console.error('Failed to load settings:', err);
@@ -337,6 +351,7 @@ async function saveSettings() {
         loop: document.getElementById('setting-loop').checked,
         mute: document.getElementById('setting-mute').checked,
         hwdec: document.getElementById('setting-hwdec').value,
+        speed: parseFloat(document.getElementById('setting-speed').value),
     };
 
     try {
@@ -389,6 +404,15 @@ const app = {
                 closePreview();
             }
         });
+
+        // Speed slider: update displayed value in real-time
+        const speedSlider = document.getElementById('setting-speed');
+        if (speedSlider) {
+            speedSlider.addEventListener('input', () => {
+                const speedValue = document.getElementById('speed-value');
+                if (speedValue) speedValue.textContent = parseFloat(speedSlider.value).toFixed(1);
+            });
+        }
 
         // Load initial data
         loadWallpapers();

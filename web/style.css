@@ -442,13 +442,19 @@ body {
 
 .setting-item select,
 .setting-item input[type="url"],
-.setting-item input[type="text"] {
+.setting-item input[type="text"],
+.setting-item input[type="range"] {
     padding: 0.5rem 0.75rem;
     border: 1px solid var(--border);
     background: var(--bg-secondary);
     color: var(--text-primary);
     border-radius: var(--radius);
     min-width: 200px;
+}
+
+.setting-item input[type="range"] {
+    width: 200px;
+    cursor: pointer;
 }
 
 .setting-item select:focus,
