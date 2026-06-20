@@ -18,6 +18,6 @@ platformdirs >= 3.0
 # pip install gtk-layer-shell
 # gtk-layer-shell >= 0.1
 
-# Optional: web UI (pywebview)
-# pip install webview
-# webview >= 0.1
+# Optional: web UI (pywebview) - requires system GTK/WebKit dev libraries
+# pip install pywebview
+# pywebview >= 4.0

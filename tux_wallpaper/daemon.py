@@ -147,20 +147,34 @@ def _tray_stop(*args: object) -> None:
 
 
 def _tray_open_ui(*args: object) -> None:
-    """Open the web UI window."""
-    import webview
-    global _window
-    if _window is None:
-        _window = webview.create_window(
-            "Tux Wallpaper",
-            "http://127.0.0.1:18422",
-            width=1200,
-            height=800,
-            resizable=True,
-            js_api=webview,
+    """Open the web UI window.
+
+    Tries pywebview first (native window). Falls back to opening
+    the URL in the system's default browser.
+    """
+    import logging
+    import webbrowser
+
+    try:
+        import webview  # type: ignore
+
+        global _window
+        if _window is None:
+            _window = webview.create_window(
+                "Tux Wallpaper",
+                "http://127.0.0.1:18422",
+                width=1200,
+                height=800,
+                resizable=True,
+            )
+            webview.start()
+            _window = None
+    except ImportError:
+        logging.info(
+            "pywebview not available, opening UI in default browser. "
+            "Navigate to http://127.0.0.1:18422"
         )
-        webview.start()
-        _window = None
+        webbrowser.open("http://127.0.0.1:18422")
 
 
 def _tray_settings(*args: object) -> None:
