@@ -69,7 +69,6 @@ build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-asyncio_mode = "auto"
 filterwarnings = [
     "error",
     "ignore::DeprecationWarning",

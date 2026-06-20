@@ -178,7 +178,7 @@ class MpvPlayer:
     @property
     def is_running(self) -> bool:
         """Check if mpv process is running."""
-        return self._mpv is not None and not self._mpv.window_alive
+        return self._mpv is not None
 
     @property
     def window_id(self) -> Optional[int]:
@@ -282,6 +282,7 @@ class MpvPlayer:
             except Exception as exc:
                 self._log.debug(f"mpv termination: {exc}")
             self._mpv = None
+            self._update_state(PlaybackState.STOPPED)
 
         if self._window is not None:
             try:

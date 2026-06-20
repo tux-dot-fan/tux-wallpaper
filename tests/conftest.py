@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import sys
 import tempfile
 from pathlib import Path
@@ -33,12 +32,3 @@ def sample_video_path(temp_dir: Path) -> Path:
     video_path = temp_dir / "sample.mp4"
     video_path.write_bytes(b"fake video content for testing")
     return video_path
-
-
-@pytest.fixture
-def mock_mpv(mocker):
-    """Mock the mpv subprocess."""
-    mock_process = mocker.MagicMock()
-    mock_process.poll.return_value = None  # Process is running
-    mocker.patch("subprocess.Popen", return_value=mock_process)
-    return mock_process

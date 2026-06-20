@@ -25,8 +25,8 @@ class TestPlayerConfig:
         assert config.mute is True
         assert config.hwdec == "auto"
         assert config.vo == "wayland,x11,null"
-        assert config.audio_client == "none"
         assert config.speed == 1.0
+        assert config.volume == 0
 
     def test_custom_config(self) -> None:
         """Test custom player configuration."""
@@ -71,55 +71,80 @@ class TestMpvPlayer:
         with pytest.raises(RuntimeError, match="No video loaded"):
             player.play()
 
-    def test_play_starts_process(self, sample_video_path: Path, mock_mpv) -> None:
+    def test_play_starts_process(self, sample_video_path: Path) -> None:
         """Test play() starts the mpv subprocess."""
-        player = MpvPlayer()
-        player.load(sample_video_path)
-        player.play()
+        mock_mpv_module = MagicMock()
+        mock_mpv_instance = MagicMock()
+        mock_mpv_module.MPV.return_value = mock_mpv_instance
 
-        assert player.is_running
-        assert player.state == PlaybackState.PLAYING
+        with patch.dict("sys.modules", {"mpv": mock_mpv_module}):
+            player = MpvPlayer()
+            player.load(sample_video_path)
+            player.play()
 
-    def test_stop_terminates_process(self, sample_video_path: Path, mock_mpv) -> None:
+            assert player.is_running
+            assert player.state == PlaybackState.PLAYING
+
+    def test_stop_terminates_process(self, sample_video_path: Path) -> None:
         """Test stop() terminates the mpv subprocess."""
-        player = MpvPlayer()
-        player.load(sample_video_path)
-        player.play()
-        player.stop()
+        mock_mpv_module = MagicMock()
+        mock_mpv_instance = MagicMock()
+        mock_mpv_instance.window_alive = True
+        mock_mpv_module.MPV.return_value = mock_mpv_instance
 
-        assert player.state == PlaybackState.STOPPED
-        assert not player.is_running
+        with patch.dict("sys.modules", {"mpv": mock_mpv_module}):
+            player = MpvPlayer()
+            player.load(sample_video_path)
+            player.play()
+            player.stop()
 
-    def test_pause_updates_state(self, sample_video_path: Path, mock_mpv) -> None:
+            assert player.state == PlaybackState.STOPPED
+            assert not player.is_running
+
+    def test_pause_updates_state(self, sample_video_path: Path) -> None:
         """Test pause() updates state to paused."""
-        player = MpvPlayer()
-        player.load(sample_video_path)
-        player.play()
-        player.pause()
+        mock_mpv_module = MagicMock()
+        mock_mpv_instance = MagicMock()
+        mock_mpv_instance.window_alive = True
+        mock_mpv_instance.pause = False
+        mock_mpv_module.MPV.return_value = mock_mpv_instance
 
-        assert player.state == PlaybackState.PAUSED
+        with patch.dict("sys.modules", {"mpv": mock_mpv_module}):
+            player = MpvPlayer()
+            player.load(sample_video_path)
+            player.play()
+            player.pause()
 
-    def test_toggle_pause_from_playing(self, sample_video_path: Path, mock_mpv) -> None:
+            assert player.state == PlaybackState.PAUSED
+
+    def test_toggle_pause_from_playing(self, sample_video_path: Path) -> None:
         """Test toggle_pause() from playing state."""
-        player = MpvPlayer()
-        player.load(sample_video_path)
-        player.play()
-        assert player.state == PlaybackState.PLAYING
+        mock_mpv_module = MagicMock()
+        mock_mpv_instance = MagicMock()
+        mock_mpv_instance.window_alive = True
+        mock_mpv_instance.pause = False
+        mock_mpv_module.MPV.return_value = mock_mpv_instance
 
-        player.toggle_pause()
-        assert player.state == PlaybackState.PAUSED
+        with patch.dict("sys.modules", {"mpv": mock_mpv_module}):
+            player = MpvPlayer()
+            player.load(sample_video_path)
+            player.play()
+            assert player.state == PlaybackState.PLAYING
 
-        player.toggle_pause()
-        assert player.state == PlaybackState.PLAYING
+            player.toggle_pause()
+            assert player.state == PlaybackState.PAUSED
 
-    def test_set_speed(self, sample_video_path: Path, mock_mpv) -> None:
+            player.toggle_pause()
+            assert player.state == PlaybackState.PLAYING
+
+    def test_set_speed(self, sample_video_path: Path) -> None:
         """Test setting playback speed."""
         player = MpvPlayer()
         player.config.speed = 1.0
         player.set_speed(2.0)
         assert player.config.speed == 2.0
 
-    def test_set_loop(self, sample_video_path: Path, mock_mpv) -> None:
+    def test_set_loop(self, sample_video_path: Path) -> None:
         """Test enabling/disabling loop."""
         player = MpvPlayer()
         assert player.config.loop is True
@@ -128,30 +153,42 @@ class TestMpvPlayer:
         player.set_loop(True)
         assert player.config.loop is True
 
-    def test_state_callback(self, sample_video_path: Path, mock_mpv) -> None:
+    def test_state_callback(self, sample_video_path: Path) -> None:
         """Test state change callback is called."""
-        player = MpvPlayer()
-        callback = MagicMock()
-        player.set_state_callback(callback)
+        mock_mpv_module = MagicMock()
+        mock_mpv_instance = MagicMock()
+        mock_mpv_instance.window_alive = True
+        mock_mpv_module.MPV.return_value = mock_mpv_instance
 
-        player.load(sample_video_path)
-        player.play()
+        with patch.dict("sys.modules", {"mpv": mock_mpv_module}):
+            player = MpvPlayer()
+            callback = MagicMock()
+            player.set_state_callback(callback)
 
-        assert callback.called
+            player.load(sample_video_path)
+            player.play()
 
-    def test_close_cleans_up(self, sample_video_path: Path, mock_mpv) -> None:
+            assert callback.called
+
+    def test_close_cleans_up(self, sample_video_path: Path) -> None:
         """Test close() stops process and clears callbacks."""
-        player = MpvPlayer()
-        callback = MagicMock()
-        player.set_state_callback(callback)
+        mock_mpv_module = MagicMock()
+        mock_mpv_instance = MagicMock()
+        mock_mpv_instance.window_alive = True
+        mock_mpv_module.MPV.return_value = mock_mpv_instance
 
-        player.load(sample_video_path)
-        player.play()
-        player.close()
+        with patch.dict("sys.modules", {"mpv": mock_mpv_module}):
+            player = MpvPlayer()
+            callback = MagicMock()
+            player.set_state_callback(callback)
 
-        assert player.state == PlaybackState.STOPPED
-        assert not player.is_running
-        assert len(player._state_callbacks) == 0
+            player.load(sample_video_path)
+            player.play()
+            player.close()
+
+            assert player.state == PlaybackState.STOPPED
+            assert not player.is_running
+            assert len(player._state_callbacks) == 0
 
 
 class TestPlaybackState:
