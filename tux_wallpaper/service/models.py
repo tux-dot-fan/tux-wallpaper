@@ -62,7 +62,7 @@ class WallpaperCreate(WallpaperBase):
 
     remote_id: Optional[str] = None
     remote_url: Optional[str] = None
-    file_path: Optional[Path] = None
+    file_path: Optional[Path] = Field(default=None, validation_alias="local_path")
 
 
 class Wallpaper(WallpaperBase):

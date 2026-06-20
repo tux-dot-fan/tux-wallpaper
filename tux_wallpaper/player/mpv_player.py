@@ -1,16 +1,12 @@
 """mpv-based wallpaper player engine.
 
 Controls mpv for playing video wallpapers as a desktop background on
-Wayland and X11. Uses python-mpv for process control and GTK3/X11 for
-creating the wallpaper window.
+Wayland and X11. Uses python-mpv for process control.
 """
 
 from __future__ import annotations
 
 import logging
-import os
-import signal
-import subprocess
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -35,23 +31,18 @@ class PlayerConfig:
     loop: bool = True
     mute: bool = True
     pause_when_hidden: bool = False
-    hwdec: str = "auto"  # hardware decoding
-    vo: str = "wayland,x11,null"  # video output order
+    hwdec: str = "auto"
+    vo: str = "wayland,x11,null"
     speed: float = 1.0
-    volume: int = 0  # 0 = muted
+    volume: int = 0
 
 
 @dataclass
 class MpvPlayer:
     """Controls an mpv instance for wallpaper playback.
 
-    On X11: Creates a GTK3 borderless window set as desktop type,
-    then renders mpv into it using --wid.
-
-    On Wayland: Uses wlr-layer-shell via gtk-layer-shell Python bindings
-    if available, otherwise falls back to a borderless GTK3 window.
-
-    mpv is controlled via its JSON IPC socket for pause/resume/seek commands.
+    mpv is spawned as a subprocess and controlled via the python-mpv
+    library which wraps the mpv C API.
     """
 
     config: PlayerConfig = field(default_factory=PlayerConfig)
@@ -78,13 +69,7 @@ class MpvPlayer:
         self._state_callbacks.append(callback)
 
     def load(self, video_path: Path) -> None:
-        """Load a video file for playback.
-
-        Does not start playback. Call play() to begin.
-
-        Args:
-            video_path: Path to video file (mp4, webm, mkv, etc.)
-        """
+        """Load a video file for playback."""
         if not video_path.exists():
             raise FileNotFoundError(f"Video file not found: {video_path}")
 
@@ -200,15 +185,31 @@ class MpvPlayer:
             except Exception as exc:
                 self._log.warning(f"State callback error: {exc}")
 
+    def _build_mpv_options(self) -> List[str]:
+        """Build the list of mpv command-line options from config."""
+        opts = [
+            "--hwdec=%s" % self.config.hwdec,
+            "--vo=%s" % self.config.vo,
+            "--speed=%.2f" % self.config.speed,
+            "--loop=inf" if self.config.loop else "--loop=no",
+            "--mute=yes" if self.config.mute else "--mute=no",
+            "--volume=%d" % self.config.volume,
+            "--force-window=no",
+            "--autofit-larger=100%",
+            "--keep-open=yes",
+        ]
+        return opts
+
     def _start_player(self) -> None:
         """Start the mpv player instance."""
         import mpv  # type: ignore
 
-        self._close_player()
+        if self._mpv is not None:
+            self._close_player()
 
         mpv_args = self._build_mpv_options()
 
-        self._log.debug(f"Starting mpv with options: {mpv_args}")
+        self._log.debug(f"Starting mpv with args: {mpv_args}")
 
         try:
             self._mpv = mpv.MPV(
@@ -217,10 +218,18 @@ class MpvPlayer:
                 loglevel="warn",
             )
         except Exception as exc:
-            raise RuntimeError(
-                f"Failed to start mpv: {exc}. "
-                "Ensure mpv is installed: sudo apt install mpv"
-            ) from exc
+            # Fall back to bare mpv if options fail in this build
+            self._log.warning(f"mpv with args failed ({exc}), trying bare mpv")
+            try:
+                self._mpv = mpv.MPV(
+                    log_handler=self._mpv_log,
+                    loglevel="warn",
+                )
+            except Exception as exc2:
+                raise RuntimeError(
+                    f"Failed to start mpv: {exc2}. "
+                    "Ensure mpv is installed: sudo apt install mpv"
+                ) from exc2
 
         # Set up property observers
         self._mpv.observe_property("pause", self._on_pause_changed)
@@ -228,29 +237,6 @@ class MpvPlayer:
 
         if self._current_file:
             self._mpv.play(str(self._current_file))
-
-    def _build_mpv_options(self) -> List[str]:
-        """Build the list of mpv options from config."""
-        opts = [
-            f"--hwdec={self.config.hwdec}",
-            f"--vo={self.config.vo}",
-            f"--speed={self.config.speed}",
-            "--no-terminal",
-            "--force-window=no",
-            "--autofit-larger=100%",
-            "--keep-open=yes",
-            "--inputconf=/dev/null",
-        ]
-
-        if self.config.loop:
-            opts.append("--loop=inf")
-        else:
-            opts.append("--loop=no")
-
-        if self.config.mute:
-            opts.extend(["--mute=yes", "--volume=0"])
-
-        return opts
 
     def _mpv_log(
         self,

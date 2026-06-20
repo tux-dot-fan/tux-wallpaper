@@ -163,7 +163,7 @@ class Database:
                     None,  # duration
                     None,  # width
                     None,  # height
-                    WallpaperStatus.PENDING.value,
+                    WallpaperStatus.READY.value if wallpaper.source == WallpaperSource.LOCAL else WallpaperStatus.PENDING.value,
                     0.0,
                     now,
                     now,

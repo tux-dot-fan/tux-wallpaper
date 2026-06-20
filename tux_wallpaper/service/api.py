@@ -310,6 +310,11 @@ async def playback_command(
 ) -> SuccessResponse:
     """Send a playback command (play, pause, stop)."""
     if command.action == "play":
+        if player.current_file is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No wallpaper loaded. Call POST /api/playback/wallpaper/{id} first.",
+            )
         player.play()
     elif command.action == "pause":
         player.pause()
