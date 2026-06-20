@@ -7,8 +7,10 @@ Handles wallpaper management, playback control, and remote server proxying.
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import shutil
+import subprocess
 from pathlib import Path
 from typing import Optional
 
@@ -20,6 +22,7 @@ from fastapi import (
     HTTPException,
     Query,
     Response,
+    UploadFile,
     status,
 )
 from fastapi.middleware.cors import CORSMiddleware
@@ -212,6 +215,144 @@ async def create_wallpaper(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
+        )
+
+
+def _probe_video_metadata(file_path: Path) -> dict:
+    """Use ffprobe to get video duration, width, and height."""
+    try:
+        result = subprocess.run(
+            [
+                "ffprobe",
+                "-v", "quiet",
+                "-print_format", "json",
+                "-show_format",
+                "-show_streams",
+                str(file_path),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if result.returncode != 0:
+            return {}
+        data = json.loads(result.stdout)
+
+        # Find video stream
+        duration = None
+        width = height = None
+        video_stream = next(
+            (s for s in data.get("streams", []) if s.get("codec_type") == "video"),
+            None,
+        )
+        if video_stream:
+            width = int(video_stream.get("width", 0) or 0)
+            height = int(video_stream.get("height", 0) or 0)
+        fmt = data.get("format", {})
+        if fmt.get("duration"):
+            duration = float(fmt["duration"])
+        return {"duration": duration, "width": width, "height": height}
+    except Exception:
+        return {}
+
+
+SUPPORTED_VIDEO_EXTENSIONS = {".mp4", ".webm", ".mkv", ".avi", ".mov", ".wmv"}
+
+
+@app.post(
+    "/api/wallpapers/upload",
+    response_model=Wallpaper,
+    status_code=status.HTTP_201_CREATED,
+    summary="Upload a local video file",
+)
+async def upload_wallpaper(
+    file: UploadFile,
+    db: Database = Depends(get_database),
+) -> Wallpaper:
+    """Upload a local video file and create a wallpaper entry.
+
+    The file is saved to the user's cache directory and ffprobe is used
+    to extract video metadata (duration, resolution).
+    """
+    from platformdirs import PlatformDirs
+
+    # Validate file type
+    if not file.filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No filename provided.",
+        )
+
+    ext = Path(file.filename).suffix.lower()
+    if ext not in SUPPORTED_VIDEO_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported video format: {ext}. Supported: {', '.join(SUPPORTED_VIDEO_EXTENSIONS)}",
+        )
+
+    # Save to cache directory
+    dirs = PlatformDirs("tux-wallpaper", "tux-wallpaper")
+    cache_dir = Path(dirs.user_cache_dir) / "videos"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+
+    # Generate safe local filename
+    import uuid
+    local_name = f"{uuid.uuid4().hex[:8]}{ext}"
+    local_path = cache_dir / local_name
+
+    try:
+        content = await file.read()
+        file_size = len(content)
+        with open(local_path, "wb") as f:
+            f.write(content)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to save uploaded file: {exc}",
+        )
+
+    # Probe for metadata
+    metadata = _probe_video_metadata(local_path)
+
+    # Detect format from extension
+    from tux_wallpaper.service.models import WallpaperFormat
+    fmt_map = {
+        ".mp4": WallpaperFormat.MP4,
+        ".webm": WallpaperFormat.WEBM,
+        ".mkv": WallpaperFormat.MKV,
+        ".avi": WallpaperFormat.AVI,
+        ".mov": WallpaperFormat.MOV,
+        ".wmv": WallpaperFormat.WMV,
+    }
+    wallpaper_format = fmt_map.get(ext, WallpaperFormat.UNKNOWN)
+
+    # Extract title from original filename (strip extension)
+    title = Path(file.filename).stem
+
+    # Create wallpaper record
+    try:
+        wallpaper = db.create_wallpaper(
+            WallpaperCreate(
+                title=title,
+                source=WallpaperSource.LOCAL,
+                format=wallpaper_format,
+                file_path=local_path,
+                file_size=file_size,
+                duration=metadata.get("duration"),
+                width=metadata.get("width"),
+                height=metadata.get("height"),
+                tags=[],
+                status=WallpaperStatus.READY,
+            )
+        )
+        logger.info(f"Uploaded local wallpaper: {wallpaper.id} -> {local_path}")
+        return wallpaper
+    except Exception as exc:
+        # Clean up file on DB failure
+        local_path.unlink(missing_ok=True)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to create wallpaper record: {exc}",
         )
 
 

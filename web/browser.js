@@ -364,21 +364,37 @@ async function saveSettings() {
 }
 
 async function addLocalVideo() {
-    // Use file input to select video
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'video/*';
+    input.accept = 'video/mp4,video/webm,video/x-matroska,video/avi,video/quicktime,video/x-ms-wmv';
 
     input.onchange = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        const formData = new FormData();
-        formData.append('file', file);
+        try {
+            showToast('Uploading...');
 
-        // For now, just create a wallpaper entry without the file
-        // TODO: Implement file upload to local storage
-        showToast('Local video added (upload not yet implemented)');
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const res = await fetch(`${API_BASE}/wallpapers/upload`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.detail || `Upload failed: ${res.status}`);
+            }
+
+            showToast(`Added: ${file.name}`);
+
+            // Refresh local wallpapers list
+            loadLocalWallpapers();
+        } catch (err) {
+            showToast('Upload failed: ' + err.message, 'error');
+        }
     };
 
     input.click();

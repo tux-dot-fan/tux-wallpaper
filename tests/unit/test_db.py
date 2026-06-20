@@ -55,7 +55,7 @@ class TestDatabase:
         assert wallpaper.title == "Test Video"
         assert wallpaper.source == WallpaperSource.LOCAL
         assert wallpaper.format == WallpaperFormat.MP4
-        assert wallpaper.status == WallpaperStatus.PENDING
+        assert wallpaper.status == WallpaperStatus.READY
 
     def test_get_wallpaper(self, db: Database) -> None:
         """Test retrieving a wallpaper by ID."""
@@ -109,7 +109,7 @@ class TestDatabase:
             WallpaperCreate(title="Ready", source=WallpaperSource.LOCAL)
         )
         db.create_wallpaper(
-            WallpaperCreate(title="Pending", source=WallpaperSource.LOCAL)
+            WallpaperCreate(title="Pending", source=WallpaperSource.REMOTE)
         )
 
         db.update_wallpaper(wp1.id, WallpaperUpdate(status=WallpaperStatus.READY))
