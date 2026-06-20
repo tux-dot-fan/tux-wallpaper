@@ -1,0 +1,21 @@
+# Core dependencies (matched to pyproject.toml)
+mpv>=1.0
+pywebview>=5.0
+fastapi>=0.115
+uvicorn[standard]>=0.34
+pydantic>=2.10
+pydantic-settings>=2.7
+httpx>=0.28
+tenacity>=9.0
+structlog>=25.0
+platformdirs>=4.0
+click>=8.1
+pillow>=11.0
+pillow-heif>=0.25
+
+# Server-only dependencies
+python-multipart>=0.0.20
+aiosqlite>=0.20
+argon2-cffi>=25.0
+pyjwt>=2.10
+stripe>=8.0

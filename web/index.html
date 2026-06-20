@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tux Wallpaper</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-brand">
+                <h1 class="brand">🐧 Tux Wallpaper</h1>
+            </div>
+            <nav class="header-nav">
+                <button class="nav-btn active" data-view="browse">Browse</button>
+                <button class="nav-btn" data-view="favorites">Favorites</button>
+                <button class="nav-btn" data-view="local">Local</button>
+                <button class="nav-btn" data-view="settings">Settings</button>
+            </nav>
+            <div class="header-actions">
+                <span id="playback-indicator" class="playback-indicator hidden">
+                    ▶ Now Playing: <span id="now-playing-title">-</span>
+                </span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Browse View -->
+            <section id="view-browse" class="view active">
+                <div class="toolbar">
+                    <div class="search-box">
+                        <input type="text" id="search-input" placeholder="Search wallpapers..." class="search-input">
+                        <button id="search-btn" class="btn btn-icon">🔍</button>
+                    </div>
+                    <div class="toolbar-filters">
+                        <select id="filter-tag" class="filter-select">
+                            <option value="">All Tags</option>
+                        </select>
+                        <select id="filter-source" class="filter-select">
+                            <option value="">All Sources</option>
+                            <option value="remote">Remote</option>
+                            <option value="local">Local</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="wallpaper-grid" class="wallpaper-grid">
+                    <!-- Populated by JS -->
+                </div>
+                <div id="loading-indicator" class="loading hidden">
+                    <div class="spinner"></div>
+                    <span>Loading...</span>
+                </div>
+                <div id="empty-state" class="empty-state hidden">
+                    <p>No wallpapers found.</p>
+                    <button class="btn btn-primary" onclick="app.loadWallpapers()">Refresh</button>
+                </div>
+            </section>
+
+            <!-- Favorites View -->
+            <section id="view-favorites" class="view">
+                <h2 class="view-title">Favorites</h2>
+                <div id="favorites-grid" class="wallpaper-grid"></div>
+            </section>
+
+            <!-- Local View -->
+            <section id="view-local" class="view">
+                <h2 class="view-title">Local Wallpapers</h2>
+                <div class="toolbar">
+                    <button id="add-local-btn" class="btn btn-primary">+ Add Video</button>
+                </div>
+                <div id="local-grid" class="wallpaper-grid"></div>
+            </section>
+
+            <!-- Settings View -->
+            <section id="view-settings" class="view">
+                <h2 class="view-title">Settings</h2>
+                <div class="settings-form">
+                    <div class="settings-group">
+                        <h3>Player</h3>
+                        <label class="setting-item">
+                            <span>Loop playback</span>
+                            <input type="checkbox" id="setting-loop" checked>
+                        </label>
+                        <label class="setting-item">
+                            <span>Mute audio</span>
+                            <input type="checkbox" id="setting-mute" checked>
+                        </label>
+                        <label class="setting-item">
+                            <span>Hardware decoding</span>
+                            <select id="setting-hwdec">
+                                <option value="auto">Auto</option>
+                                <option value="no">Disabled</option>
+                                <option value="vaapi">VA-API</option>
+                                <option value="vulkan">Vulkan</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="settings-group">
+                        <h3>Server</h3>
+                        <label class="setting-item">
+                            <span>Remote server URL</span>
+                            <input type="url" id="setting-server-url" placeholder="http://localhost:18420">
+                        </label>
+                    </div>
+                    <button class="btn btn-primary" onclick="app.saveSettings()">Save Settings</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Preview Modal -->
+        <div id="preview-modal" class="modal hidden">
+            <div class="modal-backdrop" onclick="app.closePreview()"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="preview-title" class="modal-title">Preview</h3>
+                    <button class="modal-close" onclick="app.closePreview()">×</button>
+                </div>
+                <div class="modal-body">
+                    <video id="preview-video" class="preview-video" controls></video>
+                    <div class="preview-info">
+                        <p id="preview-description" class="preview-description"></p>
+                        <div class="preview-meta">
+                            <span id="preview-duration" class="meta-item"></span>
+                            <span id="preview-resolution" class="meta-item"></span>
+                            <span id="preview-size" class="meta-item"></span>
+                        </div>
+                        <div class="preview-tags" id="preview-tags"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="preview-favorite-btn" class="btn btn-secondary" onclick="app.toggleFavorite()">
+                        ♡ Favorite
+                    </button>
+                    <button id="preview-play-btn" class="btn btn-primary" onclick="app.playWallpaper()">
+                        ▶ Set as Wallpaper
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toast-container" class="toast-container"></div>
+    </div>
+
+    <script src="browser.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+# Tux Wallpaper - Settings
+
+# Application
+app:
+  name: "Tux Wallpaper"
+  debug: false
+
+# Paths
+paths:
+  data_dir: "data"          # Downloaded wallpapers
+  cache_dir: "cache"        # Temporary files
+  config_dir: "config"      # Config files
+
+# Local API Server
+api:
+  host: "127.0.0.1"
+  port: 18421
+  reload: false
+
+# Remote Server (for cloud wallpaper service)
+remote:
+  base_url: "http://localhost:18420"
+  timeout: 30
+  retry:
+    max_attempts: 3
+    backoff_factor: 2
+
+# Player (mpv)
+player:
+  backend: "wayland"        # wayland, x11, or auto
+  loop: true
+  mute: true
+  pause_when_hidden: false  # Pause when no display
+
+# Web UI
+web:
+  port: 18422               # Local web server for PyWebView
+  auto_open: true
+
+# Logging
+log:
+  level: "INFO"
+  format: "console"         # console, json
+  file: null                # null = no file logging

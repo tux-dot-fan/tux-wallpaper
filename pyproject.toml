@@ -1,0 +1,127 @@
+[project]
+name = "tux-wallpaper"
+version = "0.1.0"
+description = "Video wallpaper player for Linux with cloud wallpaper service"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+    { name = "Dean", email = "dean@example.com" }
+]
+keywords = ["wallpaper", "linux", "gnome", "mpv", "wayland"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: X11 Applications :: Qt",
+    "Environment :: Wayland Applications",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Desktop Environment",
+]
+
+dependencies = [
+    "mpv>=1.0",
+    "pywebview>=5.0",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.34",
+    "pydantic>=2.10",
+    "pydantic-settings>=2.7",
+    "httpx>=0.28",
+    "tenacity>=9.0",
+    "structlog>=25.0",
+    "platformdirs>=4.0",
+    "click>=8.1",
+    "pillow>=11.0",
+    "pillow-heif>=0.25",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "pytest-asyncio>=0.25",
+    "pytest-mock>=3.14",
+    "ruff>=0.8",
+    "mypy>=1.14",
+    "types-Pillow",
+    "types-click",
+    "bandit>=1.8",
+    "pre-commit>=4.0",
+]
+
+server = [
+    "python-multipart>=0.0.20",
+    "aiosqlite>=0.20",
+    "argon2-cffi>=25.0",
+    "pyjwt>=2.10",
+    "stripe>=8.0",
+]
+
+[project.scripts]
+tux-wallpaper = "tux_wallpaper.daemon:main"
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "tux_wallpaper/_version.py"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["tux_wallpaper"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes
+    "I",     # isort
+    "C",     # flake8-comprehensions
+    "B",     # flake8-bugbear
+    "UP",    # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["F401", "B011"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
