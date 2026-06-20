@@ -1,9 +1,9 @@
 [project]
 name = "tux-wallpaper"
 version = "0.1.0"
-description = "Video wallpaper player for Linux with cloud wallpaper service"
+description = "Video wallpaper player for Linux with cloud wallpaper store"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [
     { name = "Dean", email = "dean@example.com" }
@@ -11,30 +11,32 @@ authors = [
 keywords = ["wallpaper", "linux", "gnome", "mpv", "wayland"]
 classifiers = [
     "Development Status :: 3 - Alpha",
-    "Environment :: X11 Applications :: Qt",
+    "Environment :: X11 Applications",
     "Environment :: Wayland Applications",
     "Intended Audience :: End Users/Desktop",
     "License :: OSI Approved :: MIT License",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Desktop Environment",
 ]
 
 dependencies = [
+    # Video playback
     "mpv>=1.0",
-    "pywebview>=5.0",
-    "fastapi>=0.115",
-    "uvicorn[standard]>=0.34",
-    "pydantic>=2.10",
-    "pydantic-settings>=2.7",
-    "httpx>=0.28",
-    "tenacity>=9.0",
-    "structlog>=25.0",
+    "python-mpv>=1.0",
+    # Configuration
+    "PyYAML>=6.0",
     "platformdirs>=4.0",
-    "click>=8.1",
-    "pillow>=11.0",
-    "pillow-heif>=0.25",
+    # Local API service
+    "fastapi>=0.100",
+    "pydantic>=2.0",
+    "httpx>=0.24",
+    "uvicorn[standard]>=0.20",
+    # System tray
+    "pystray>=0.19",
+    "Pillow>=10.0",
 ]
 
 [project.optional-dependencies]
@@ -50,7 +52,6 @@ dev = [
     "bandit>=1.8",
     "pre-commit>=4.0",
 ]
-
 server = [
     "python-multipart>=0.0.20",
     "aiosqlite>=0.20",
@@ -63,14 +64,8 @@ server = [
 tux-wallpaper = "tux_wallpaper.daemon:main"
 
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[tool.hatch.version]
-source = "vcs"
-
-[tool.hatch.build.hooks.vcs]
-version-file = "tux_wallpaper/_version.py"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -92,7 +87,7 @@ exclude_lines = [
 ]
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py311"
 line-length = 100
 select = [
     "E",     # pycodestyle errors
@@ -104,7 +99,7 @@ select = [
     "UP",    # pyupgrade
 ]
 ignore = [
-    "E501",  # line too long (handled by formatter)
+    "E501",  # line too long
     "B008",  # do not perform function calls in argument defaults
     "C901",  # too complex
 ]
@@ -114,7 +109,7 @@ ignore = [
 "tests/*" = ["F401", "B011"]
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.11"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
