@@ -39,6 +39,30 @@ pip install -e ".[dev]"
 tux-wallpaper
 ```
 
+## Roadmap
+
+### ✅ Completed
+- [x] **Player core** — `MpvPlayer` + `WallpaperWindow` + `WallpaperEngine` (python-mpv, GTK3 borderless)
+- [x] **Local API** — FastAPI on 127.0.0.1:18421 (wallpaper CRUD, playback commands)
+- [x] **Web UI** — HTML/JS/CSS at `web/` (served on 127.0.0.1:18422)
+- [x] **System tray** — `daemon.py` with tray icon and menu (graceful browser fallback)
+- [x] **Database** — SQLite via `service/db.py` with schema migrations
+- [x] **Unit tests** — 36 tests passing (`tests/unit/`)
+
+### 🔄 In Progress
+- [ ] **daemon.py integration** — connect `daemon.py` to `WallpaperEngine` (wallpaper_engine.py is written but daemon.py still uses old direct player calls)
+- [ ] **Real video test** — verify wallpaper displays correctly on live GNOME/Wayland desktop (cannot test via SSH)
+
+### 📋 Planned
+- [ ] **Remote server** — `server/` directory is scaffolded but DB is not wired in
+- [ ] **Paid downloads** — Stripe Webhook integration for premium wallpapers
+- [ ] **Wallpaper store UI** — browse/search/buy wallpapers in the web interface
+- [ ] **Playlist support** — wallpapers.json with multiple videos, shuffle/repeat
+- [ ] **Performance optimization** — pre-load next wallpaper, memory management
+- [ ] **Settings UI** — playback speed, loop mode, volume, monitor selection
+
+---
+
 ## Project Structure
 
 ```
