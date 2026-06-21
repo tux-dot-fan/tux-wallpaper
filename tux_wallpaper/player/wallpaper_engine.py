@@ -80,11 +80,24 @@ class WallpaperEngine:
         """Start playing the loaded wallpaper.
 
         Creates the wallpaper window if not already created, then starts mpv.
+        On GNOME Wayland (use_gnome_extension=True), delegates window management
+        to the GNOME Shell Extension instead of creating a GTK window.
         """
         if self._wallpaper_path is None:
             raise RuntimeError("No wallpaper loaded. Call load() first.")
 
-        # Create window if needed
+        if self.player_config.use_gnome_extension:
+            # GNOME Wayland path: delegate to the Gjs extension via command file.
+            # No GTK window needed; extension handles mpv subprocess + z-order.
+            from tux_wallpaper.service.gnome_extension import GnomeExtensionBridge
+
+            bridge = GnomeExtensionBridge()
+            bridge.play(self._wallpaper_path)
+            logger.info(f"Delegated wallpaper playback to GNOME Extension: {self._wallpaper_path}")
+            self._player._update_state(PlaybackState.PLAYING)
+            return
+
+        # Standard path: create GTK window and embed mpv into it
         if not self._window.is_created:
             width, height = self._detect_screen_resolution()
             window_id = self._window.create(width, height)
@@ -99,6 +112,15 @@ class WallpaperEngine:
 
     def stop(self) -> None:
         """Stop playback and close the wallpaper window."""
+        if self.player_config.use_gnome_extension:
+            from tux_wallpaper.service.gnome_extension import GnomeExtensionBridge
+
+            bridge = GnomeExtensionBridge()
+            bridge.stop()
+            self._player._update_state(PlaybackState.STOPPED)
+            logger.info("Wallpaper stopped via GNOME Extension")
+            return
+
         self._player.stop()
         self._window.close()
         logger.info("Wallpaper stopped and window closed")

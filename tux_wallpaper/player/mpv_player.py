@@ -35,6 +35,9 @@ class PlayerConfig:
     vo: str = "wayland,x11,null"
     speed: float = 1.0
     volume: int = 0
+    # When True, skip GTK window creation and delegate to GNOME Shell Extension
+    # (for GNOME Wayland where gtk-layer-shell is not supported)
+    use_gnome_extension: bool = False
 
 
 @dataclass

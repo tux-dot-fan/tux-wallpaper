@@ -482,6 +482,7 @@ async def play_wallpaper(
     wallpaper_id: int,
     player: WallpaperEngine = Depends(get_player),
     db: Database = Depends(get_database),
+    gnome_extension: bool = Query(default=False),
 ) -> SuccessResponse:
     """Load and play a wallpaper video."""
     wallpaper = db.get_wallpaper(wallpaper_id)
@@ -502,6 +503,10 @@ async def play_wallpaper(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Wallpaper file not found for {wallpaper_id}",
         )
+
+    # Enable GNOME extension mode if requested
+    if gnome_extension:
+        player.player_config.use_gnome_extension = True
 
     player.load(wallpaper.file_path)
     player.play()
