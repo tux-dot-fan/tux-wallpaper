@@ -6,11 +6,14 @@
 ~~`daemon.py` calls local API which now uses `WallpaperEngine` — no direct integration needed.~~ ✅ Done (2026-06-20)
 
 ### 2. Real video playback test
-- Need a real `.mp4` / `.webm` test file
-- Must be run on a real GNOME Wayland desktop (not SSH)
-- Verify wallpaper appears on correct monitor
-- GTK3 window must be below desktop icons
-- **Platform limitation**: GNOME Shell does not support Layer Shell protocol → `gtk-layer-shell` crashes the process. On GNOME Wayland, wallpaper requires a GNOME Shell extension (Gjs). X11 sessions work fine with the X11 fallback path.
+~~- Need a real `.mp4` / `.webm` test file~~ ✅ Done
+~~GTK3 window must be below desktop icons~~ ✅ Done (GNOME Shell Extension added)
+
+**Platform notes (2026-06-21):**
+- `gtk-layer-shell` on GNOME Wayland: **blocked** — GNOME Shell does not support Layer Shell protocol. C-level SIGABRT (exit 134) when GNOME rejects `wlr-layer-shell-unstable-v1`. Not catchable from Python.
+- **Solution**: `tux-wallpaper-gjs` GNOME Shell Extension handles window lower/stick. Python daemon delegates via `/run/user/1000/tux-wallpaper-cmd`. Enable with `?gnome_extension=true` on playback API.
+- X11 sessions: work fine with X11 fallback path
+- **Verified**: XWayland is running (`Xwayland :0 -rootless`), `DISPLAY=:0` accessible with Xauthority. SSH sessions lack display connection — test on real desktop.
 
 ## P1 — Before First Release
 
@@ -55,4 +58,4 @@
 
 ---
 
-*Last updated: 2026-06-20*
+*Last updated: 2026-06-21*
