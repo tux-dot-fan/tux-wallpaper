@@ -169,7 +169,7 @@ class WallpaperWindow:
         window.set_decorated(False)
         window.set_resizable(False)
         window.set_default_size(width, height)
-        window.set_position(Gtk.PositionType.CENTER)
+        window.set_position(Gtk.WindowPosition.CENTER)
         window.stick()
         window.set_keep_below(True)
 
@@ -190,7 +190,7 @@ class WallpaperWindow:
         window.realize()
         window.move(0, 0)
 
-        xid = window.get_xid()
+        xid = window.get_window().get_xid()
         self._window_id = xid
         self._gtk_window = window
 
@@ -216,12 +216,13 @@ class WallpaperWindow:
         borderless window which works on GNOME Shell via XWayland.
         """
         try:
-            import gtk_layer_shell  # type: ignore
-
+            import gi
+            gi.require_version("GtkLayerShell", "0.1")
+            from gi.repository import GtkLayerShell
             return self._create_layer_shell_window(width, height, output_name)
-        except ImportError:
+        except Exception as exc:
             logger.info(
-                "gtk-layer-shell not available, falling back to GTK3 borderless "
+                f"gtk-layer-shell not available ({exc}), falling back to GTK3 borderless "
                 "window (works on XWayland/GNOME)"
             )
             return self._create_x11_window(width, height)
@@ -236,9 +237,8 @@ class WallpaperWindow:
         import gi
 
         gi.require_version("Gtk", "3.0")
-        from gi.repository import Gdk, Gtk  # noqa: F401
-
-        import gtk_layer_shell  # type: ignore
+        gi.require_version("GtkLayerShell", "0.1")
+        from gi.repository import Gdk, Gtk, GtkLayerShell  # noqa: F401
 
         # GTK + gtk-layer-shell initialization
         Gtk.init_check()
@@ -249,22 +249,22 @@ class WallpaperWindow:
         window.set_default_size(width, height)
 
         # Initialize gtk-layer-shell for this window
-        gtk_layer_shell.init_for_window(window)
+        GtkLayerShell.init_for_window(window)
 
         # Anchor to all edges (full screen)
         for edge in (
-            gtk_layer_shell.Edge.TOP,
-            gtk_layer_shell.Edge.BOTTOM,
-            gtk_layer_shell.Edge.LEFT,
-            gtk_layer_shell.Edge.RIGHT,
+            GtkLayerShell.Edge.TOP,
+            GtkLayerShell.Edge.BOTTOM,
+            GtkLayerShell.Edge.LEFT,
+            GtkLayerShell.Edge.RIGHT,
         ):
-            gtk_layer_shell.set_anchor(window, edge, 0)
+            GtkLayerShell.set_anchor(window, edge, 0)
 
         # Set to background layer
-        gtk_layer_shell.set_layer(window, gtk_layer_shell.Layer.LAYER_BACKGROUND)
+        GtkLayerShell.set_layer(window, GtkLayerShell.Layer.BACKGROUND)
 
         # Set exclusive zone to keep window at bottom
-        gtk_layer_shell.set_exclusive_zone(window, -1)
+        GtkLayerShell.set_exclusive_zone(window, -1)
 
         # Optionally pin to specific monitor
         if output_name:
@@ -272,7 +272,7 @@ class WallpaperWindow:
             try:
                 monitor = display.get_monitor_by_name(output_name)
                 if monitor:
-                    gtk_layer_shell.set_monitor(window, monitor)
+                    GtkLayerShell.set_monitor(window, monitor)
                     logger.info(f"Pinned wallpaper to monitor: {output_name}")
             except Exception as exc:
                 logger.warning(f"Could not set monitor {output_name}: {exc}")
@@ -282,7 +282,7 @@ class WallpaperWindow:
         # Get the underlying X11 window ID (works even on Wayland via XWayland)
         # gtk-layer-shell surfaces have an X11 window under XWayland
         try:
-            xid = window.get_xid()
+            xid = window.get_window().get_xid()
         except Exception:
             # Pure Wayland surface - mpv needs special handling
             logger.warning(
