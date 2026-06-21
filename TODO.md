@@ -10,6 +10,7 @@
 - Must be run on a real GNOME Wayland desktop (not SSH)
 - Verify wallpaper appears on correct monitor
 - GTK3 window must be below desktop icons
+- **Platform limitation**: GNOME Shell does not support Layer Shell protocol → `gtk-layer-shell` crashes the process. On GNOME Wayland, wallpaper requires a GNOME Shell extension (Gjs). X11 sessions work fine with the X11 fallback path.
 
 ## P1 — Before First Release
 

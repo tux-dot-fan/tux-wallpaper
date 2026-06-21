@@ -158,11 +158,15 @@ class WallpaperWindow:
         """Create a borderless X11 desktop window using GTK3."""
         import gi
 
+        gi.require_version("Gdk", "3.0")
         gi.require_version("Gtk", "3.0")
         from gi.repository import Gdk, GdkX11, GdkPixbuf, Gtk
 
-        # Initialize GTK in subprocess-safe mode
-        Gtk.init_check()
+        # Initialize GTK (may already be initialized)
+        try:
+            Gtk.init_check()
+        except RuntimeError:
+            pass  # Already initialized
 
         # Create the main window
         window = Gtk.Window()
@@ -213,7 +217,7 @@ class WallpaperWindow:
 
         gtk-layer-shell is preferred for proper layer-shell support on
         wlroots compositors (Sway, Wayfire, etc.). Falls back to GTK3
-        borderless window which works on GNOME Shell via XWayland.
+        borderless window which works on X11 and XWayland.
         """
         try:
             import gi
@@ -221,10 +225,7 @@ class WallpaperWindow:
             from gi.repository import GtkLayerShell
             return self._create_layer_shell_window(width, height, output_name)
         except Exception as exc:
-            logger.info(
-                f"gtk-layer-shell not available ({exc}), falling back to GTK3 borderless "
-                "window (works on XWayland/GNOME)"
-            )
+            logger.debug(f"Layer-shell window unavailable ({exc}), using X11 fallback")
             return self._create_x11_window(width, height)
 
     def _create_layer_shell_window(
@@ -240,8 +241,11 @@ class WallpaperWindow:
         gi.require_version("GtkLayerShell", "0.1")
         from gi.repository import Gdk, Gtk, GtkLayerShell  # noqa: F401
 
-        # GTK + gtk-layer-shell initialization
-        Gtk.init_check()
+        # Initialize GTK (may already be initialized from a prior call)
+        try:
+            Gtk.init_check()
+        except RuntimeError:
+            pass  # Already initialized
 
         window = Gtk.Window()
         window.set_decorated(False)
