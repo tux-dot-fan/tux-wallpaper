@@ -35,7 +35,7 @@ cat > "$DEB_PKG/usr/share/applications/tux-wallpaper.desktop" << 'EOF'
 Name=Tux Wallpaper
 Comment=Video wallpaper player for Linux
 Exec=tux-wallpaper
-Icon=video-desktop
+Icon=/usr/share/icons/hicolor/128x128/apps/vlc.png
 Terminal=false
 Type=Application
 Categories=Utility;Video;
