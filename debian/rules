@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+
+# Build the Python package
+cd /tmp
+rm -rf tux-wallpaper-build
+mkdir tux-wallpaper-build
+cd tux-wallpaper-build
+
+python3 -m build --no-isolation /home/dean/Code/tux-wallpaper 2>&1 | tail -3

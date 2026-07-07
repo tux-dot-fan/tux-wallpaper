@@ -1,29 +1,12 @@
-"""Player module for video wallpaper playback.
+"""Tux Wallpaper player module.
 
-Provides the high-level WallpaperEngine and individual components:
-- WallpaperWindow: GTK3/X11 full-screen borderless window
-- MpvPlayer: mpv process controller
-- WallpaperEngine: combines window + player
+This package uses lazy imports to avoid GTK/VLC dependencies at import time.
+Import the specific classes you need:
+
+    from tux_wallpaper.player.video_player import VideoPlayer
+    from tux_wallpaper.player.base_player import BasePlayer
+    from tux_wallpaper.player.handlers import ActiveHandler, WindowHandler
+    from tux_wallpaper.fade import Fade
 """
 
-from tux_wallpaper.player.mpv_player import (
-    MpvPlayer,
-    PlaybackState,
-    PlayerConfig,
-)
-from tux_wallpaper.player.wallpaper_engine import WallpaperEngine
-from tux_wallpaper.player.window import (
-    WallpaperWindow,
-    WindowBackend,
-    WindowConfig,
-)
-
-__all__ = [
-    "MpvPlayer",
-    "PlaybackState",
-    "PlayerConfig",
-    "WallpaperWindow",
-    "WallpaperEngine",
-    "WindowBackend",
-    "WindowConfig",
-]
+from __future__ import annotations

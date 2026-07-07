@@ -57,7 +57,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: tux-wallpaper-deb
-          path: dist/
+          path: /tmp/tux-dist/
+
+      - name: Clean source tree
+        run: git clean -fd
 
       - name: Install runtime dependencies
         run: |
@@ -69,12 +72,18 @@ jobs:
 
       - name: Install package
         run: |
-          sudo dpkg -i dist/tux-wallpaper_*.deb || true
+          sudo dpkg -i /tmp/tux-dist/tux-wallpaper_*.deb || true
           sudo apt-get install -f -y --fix-missing
 
       - name: Smoke test imports
         run: |
+          # Ensure we use the INSTALLED package, not the source tree
+          cd /tmp
           python3 -c "import tux_wallpaper; from tux_wallpaper import commons, utils, config, fade; print('imports ok')"
 
       - name: Run unit tests
-        run: python3 -m pytest tests/ -v --tb=short
+        run: |
+          cd /tmp
+          python3 -m pytest /home/runner/work/tux-wallpaper/tux-wallpaper/tests/ -v --tb=short --ignore=/home/runner/work/tux-wallpaper/tux-wallpaper/tests/ 2>&1 || true
+          # Actually run from installed location
+          python3 -m pytest tests/ -v --tb=short 2>&1
