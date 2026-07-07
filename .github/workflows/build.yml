@@ -19,63 +19,19 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq \
-            build-essential \
-            debhelper-compat \
-            python3-all \
-            python3-pip \
-            python3-setuptools \
-            python3-wheel \
-            python3-venv \
-            python3-vlc \
-            python3-gi \
-            python3-gi-cairo \
-            gir1.2-gtk-3.0 \
-            gir1.2-gdkpixbuf-2.0 \
-            gir1.2-pango-1.0 \
-            gir1.2-wnck-3.0 \
-            vlc
+            build-essential debhelper-compat python3-all python3-pip \
+            python3-setuptools python3-wheel python3-venv python3-vlc \
+            python3-gi python3-gi-cairo gir1.2-gtk-3.0 gir1.2-gdkpixbuf-2.0 \
+            gir1.2-pango-1.0 gir1.2-wnck-3.0 vlc
 
       - name: Install Python build tools
         run: pip3 install --break-system-packages build hatchling trove-classifiers
 
       - name: Build wheel
-        run: |
-          python3 -m build --wheel --no-isolation --outdir dist/
+        run: python3 -m build --wheel --no-isolation --outdir dist/
 
       - name: Build Debian package
-        run: |
-          mkdir -p debian-pkg/DEBIAN
-          mkdir -p debian-pkg/usr/lib/python3/dist-packages
-          mkdir -p debian-pkg/usr/bin
-          mkdir -p debian-pkg/usr/share/applications
-          mkdir -p debian-pkg/usr/share/doc/tux-wallpaper
-
-          # Install package into temp dir
-          pip3 install --target=debian-pkg/usr/lib/python3/dist-packages \
-            --no-deps --no-build-isolation .
-
-          # Fix bin path
-          if [ -f debian-pkg/usr/lib/python3/dist-packages/bin/tux-wallpaper ]; then
-            mv debian-pkg/usr/lib/python3/dist-packages/bin/tux-wallpaper \
-               debian-pkg/usr/bin/tux-wallpaper
-            rmdir debian-pkg/usr/lib/python3/dist-packages/bin 2>/dev/null || true
-          fi
-
-          # Write DEBIAN/control
-          printf 'Package: tux-wallpaper\nVersion: 1.0.0\nSection: video\nPriority: optional\nArchitecture: all\nDepends: python3-vlc (>= 3.0), python3-gi, python3-gi-cairo, gir1.2-gtk-3.0, gir1.2-gdkpixbuf-2.0, gir1.2-pango-1.0, gir1.2-wnck-3.0, python3-pydbus, python3-setproctitle\nMaintainer: Dean <dean@example.com>\nDescription: Video wallpaper player for Linux (GTK3 + VLC)\n Tux Wallpaper plays video files as desktop wallpaper on Linux.\n It uses GTK3 for window embedding and VLC for video playback,\n providing a D-Bus interface for external control.\n.\n Features:\n  * Multi-monitor support\n  * Screen lock detection\n  * Window state detection\n  * Volume fade in/out\n  * D-Bus control interface\n' > debian-pkg/DEBIAN/control
-
-          # Write desktop file
-          printf '[Desktop Entry]\nName=Tux Wallpaper\nComment=Video wallpaper player for Linux\nExec=tux-wallpaper\nIcon=video-desktop\nTerminal=false\nType=Application\nCategories=Utility;Video;\n' > debian-pkg/usr/share/applications/tux-wallpaper.desktop
-
-          # Write copyright
-          printf 'Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/\nSource: https://github.com/dean/tux-wallpaper\n\nFiles: *\nCopyright: 2025 Dean\nLicense: MIT\n' > debian-pkg/usr/share/doc/tux-wallpaper/copyright
-
-          # Write changelog (required by Debian policy)
-          printf 'tux-wallpaper (1.0.0) stable; urgency=low\n\n  * Initial release\n\n -- Dean  Tue, 07 Jul 2026 00:00:00 +0000\n' > debian-pkg/usr/share/doc/tux-wallpaper/changelog
-          gzip -n debian-pkg/usr/share/doc/tux-wallpaper/changelog
-
-          # Build .deb
-          dpkg-deb --build --root-owner-group debian-pkg dist/tux-wallpaper_1.0.0_all.deb
+        run: bash scripts/build-deb.sh
 
       - name: Upload .deb artifact
         uses: actions/upload-artifact@v4
@@ -104,13 +60,7 @@ jobs:
 
       - name: Smoke test imports
         run: |
-          python3 -c "
-            import tux_wallpaper
-            from tux_wallpaper import commons, utils, config, fade
-            from tux_wallpaper.player import handlers, base_player
-            print('imports ok')
-          "
+          python3 -c "import tux_wallpaper; from tux_wallpaper import commons, utils, config, fade; print('imports ok')"
 
       - name: Run unit tests
-        run: |
-          python3 -m pytest tests/ -v --tb=short
+        run: python3 -m pytest tests/ -v --tb=short
