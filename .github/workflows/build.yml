@@ -53,6 +53,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Download .deb artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tux-wallpaper-deb
+          path: dist/
+
       - name: Install package
         run: |
           sudo dpkg -i dist/tux-wallpaper_*.deb || true
