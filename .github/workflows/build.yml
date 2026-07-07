@@ -61,8 +61,9 @@ jobs:
 
       - name: Install package
         run: |
+          sudo apt-get update -qq
           sudo dpkg -i dist/tux-wallpaper_*.deb || true
-          sudo apt-get install -f -y
+          sudo apt-get install -f -y --fix-missing
 
       - name: Smoke test imports
         run: |
