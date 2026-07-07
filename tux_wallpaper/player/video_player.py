@@ -39,7 +39,7 @@ from ..commons import (
 from ..config import ConfigUtil
 from ..fade import Fade
 from ..utils import is_nvidia_proprietary, is_vdpau_ok, is_wayland
-from .base_player import BasePlayer
+from .base_player import APP_ID, BasePlayer
 from .handlers import WindowHandler
 
 logger = logging.getLogger(LOGGER_NAME)
