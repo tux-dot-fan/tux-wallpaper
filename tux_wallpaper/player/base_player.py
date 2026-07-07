@@ -129,11 +129,11 @@ class BasePlayer:
     # Gtk.Application lifecycle (override in subclass that inherits Gtk.Application)
     # -------------------------------------------------------------------------
 
-    def do_startup(self) -> None:
+    def do_startup(self, *args) -> None:
         """GTK startup. Override in Gtk.Application subclass."""
         pass
 
-    def do_activate(self) -> None:
+    def do_activate(self, *args) -> None:
         """Create windows for all monitors and register D-Bus."""
         from gi.repository import Gdk
         from pydbus import SessionBus

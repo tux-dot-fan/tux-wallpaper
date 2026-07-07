@@ -344,8 +344,8 @@ class VideoPlayer(Gtk.Application, BasePlayer):
         name = gdk_monitor.get_model() or f"Monitor-{rect.x},{rect.y}"
         return PlayerWindow(name, rect.width, rect.height, application=self)
 
-    def do_activate(self) -> None:
-        super().do_activate()
+    def do_activate(self, *args) -> None:
+        super().do_activate(*args)
         self.data_source = self.config.get(CONFIG_KEY_DATA_SOURCE, {})
 
     def _on_active_changed(self, active: bool) -> None:
