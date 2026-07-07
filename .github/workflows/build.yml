@@ -36,7 +36,7 @@ jobs:
             vlc
 
       - name: Install Python build tools
-        run: pip3 install --break-system-packages hatchling trove-classifiers
+        run: pip3 install --break-system-packages build hatchling trove-classifiers
 
       - name: Build wheel
         run: |
