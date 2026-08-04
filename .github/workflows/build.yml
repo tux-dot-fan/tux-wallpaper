@@ -78,10 +78,7 @@ jobs:
         run: which tux-wallpaper
 
       - name: Smoke test — imports
-        run: >
-          python3 -c "import tux_wallpaper;
-            from tux_wallpaper import commons, utils, config, fade;
-            print('imports ok')"
+        run: python3 -c 'import tux_wallpaper; from tux_wallpaper import commons, utils, config, fade; print("imports ok")'
 
       - name: Verify package contents
         run: |
