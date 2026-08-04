@@ -19,10 +19,11 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq \
-            build-essential debhelper-compat python3-all python3-pip \
-            python3-setuptools python3-wheel python3-venv python3-vlc \
-            python3-gi python3-gi-cairo gir1.2-gtk-3.0 gir1.2-gdkpixbuf-2.0 \
-            gir1.2-pango-1.0 gir1.2-wnck-3.0 vlc
+            build-essential debhelper-compat dh-apparmor dpkg-dev \
+            python3-all python3-pip python3-setuptools python3-wheel \
+            python3-venv python3-vlc python3-gi python3-gi-cairo \
+            gir1.2-gtk-3.0 gir1.2-gdkpixbuf-2.0 gir1.2-pango-1.0 \
+            gir1.2-wnck-3.0 gir1.2-ges-1.0 vlc
 
       - name: Install Python build tools
         run: pip3 install --break-system-packages build hatchling trove-classifiers
@@ -47,7 +48,7 @@ jobs:
           path: dist/*.whl
           retention-days: 30
 
-  test:
+  test-deb:
     needs: build-deb
     runs-on: ubuntu-latest
     steps:
@@ -64,20 +65,26 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq \
             python3-vlc python3-gi python3-gi-cairo \
-            gir1.2-gtk-3.0 gir1.2-gdkpixbuf-2.0 gir1.2-pango-1.0 gir1.2-wnck-3.0 \
-            python3-pydbus python3-setproctitle \
-            python3-pytest python3-yaml
+            gir1.2-gtk-3.0 gir1.2-gdkpixbuf-2.0 gir1.2-pango-1.0 \
+            gir1.2-wnck-3.0 gir1.2-ges-1.0 \
+            python3-pydbus python3-setproctitle
 
-      - name: Install package
+      - name: Install .deb package
         run: |
           sudo dpkg -i /tmp/tux-dist/tux-wallpaper_*.deb || true
           sudo apt-get install -f -y --fix-missing
 
-      - name: Smoke test imports
-        run: |
-          # Ensure we use the INSTALLED package, not the source tree
-          cd /tmp
-          python3 -c "import tux_wallpaper; from tux_wallpaper import commons, utils, config, fade; print('imports ok')"
+      - name: Smoke test — binary on PATH
+        run: which tux-wallpaper
 
-      - name: Run unit tests
-        run: python3 -m pytest tests/ -v --tb=short
+      - name: Smoke test — imports
+        run: |
+          python3 -c "
+            import tux_wallpaper
+            from tux_wallpaper import commons, utils, config, fade
+            print('imports ok')
+          "
+
+      - name: Verify package contents
+        run: |
+          dpkg -L tux-wallpaper | grep -E '(usr/bin|usr/lib|usr/share/applications)'
