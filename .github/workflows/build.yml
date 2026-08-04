@@ -94,7 +94,9 @@ jobs:
       - name: Create GitHub Release with artifacts
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*.deb dist/*.whl
+          files: |
+            dist/*.deb
+            dist/*.whl
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
