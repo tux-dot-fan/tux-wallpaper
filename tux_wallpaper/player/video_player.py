@@ -345,7 +345,7 @@ class VideoPlayer(Gtk.Application, BasePlayer):
         return PlayerWindow(name, rect.width, rect.height, application=self)
 
     def do_activate(self, *args) -> None:
-        super().do_activate(*args)
+        super().do_activate()
         self.data_source = self.config.get(CONFIG_KEY_DATA_SOURCE, {})
 
     def _on_active_changed(self, active: bool) -> None:
