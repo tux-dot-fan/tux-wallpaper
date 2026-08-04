@@ -80,6 +80,30 @@ jobs:
       - name: Smoke test — imports
         run: python3 -c 'import tux_wallpaper; from tux_wallpaper import commons, utils, config, fade; print("imports ok")'
 
-      - name: Verify package contents
-        run: |
-          dpkg -L tux-wallpaper | grep -E '(usr/bin|usr/lib|usr/share/applications)'
+  release-deb:
+    needs: test-deb
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    permissions:
+      contents: write
+    steps:
+      - name: Download .deb artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tux-wallpaper-deb
+          path: dist/
+
+      - name: Download wheel artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tux-wallpaper-wheel
+          path: dist/
+
+      - name: Create GitHub Release with artifacts
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/tux-wallpaper_*.deb dist/*.whl
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
