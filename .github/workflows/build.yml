@@ -34,18 +34,13 @@ jobs:
       - name: Build Debian package
         run: bash scripts/build-deb.sh
 
-      - name: Upload .deb artifact
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: tux-wallpaper-deb
-          path: dist/tux-wallpaper_*.deb
-          retention-days: 30
-
-      - name: Upload wheel artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: tux-wallpaper-wheel
-          path: dist/*.whl
+          name: tux-wallpaper-build
+          path: |
+            dist/*.deb
+            dist/*.whl
           retention-days: 30
 
   test-deb:
@@ -54,10 +49,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download .deb artifact
+      - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: tux-wallpaper-deb
+          name: tux-wallpaper-build
           path: /tmp/tux-dist/
 
       - name: Install runtime dependencies
@@ -87,20 +82,14 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download .deb artifact
+      - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: tux-wallpaper-deb
+          name: tux-wallpaper-build
           path: dist/
 
-      - name: Download wheel artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: tux-wallpaper-wheel
-          path: dist/
-
-      - name: List dist contents (debug)
-        run: ls -la dist/
+      - name: Debug dist contents
+        run: find dist/ -type f && ls -la dist/
 
       - name: Create GitHub Release with artifacts
         uses: softprops/action-gh-release@v2
