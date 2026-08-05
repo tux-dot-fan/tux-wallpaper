@@ -113,6 +113,12 @@ jobs:
           mkdir -p dist/
           cp tux-wallpaper-0.1.0-x86_64.AppImage dist/
 
+      - name: Install tux-wallpaper to system Python
+        run: sudo pip3 install --break-system-packages --force-reinstall --no-deps dist/tux_wallpaper-*.whl || true
+
+      - name: Check Python prefix
+        run: python3 -c "import sys; print(sys.prefix)"
+
       - name: Upload AppImage artifact
         uses: actions/upload-artifact@v4
         with:
