@@ -69,7 +69,7 @@ EOF
 
 # Write changelog (required by Debian policy)
 cat > "$DEB_PKG/usr/share/doc/tux-wallpaper/changelog" << 'EOF'
-tux-wallpaper (1.0.0) stable; urgency=low
+tux-wallpaper (0.1.4) stable; urgency=low
 
   * Initial release
 
@@ -78,4 +78,4 @@ EOF
 gzip -n "$DEB_PKG/usr/share/doc/tux-wallpaper/changelog"
 
 # Build .deb
-dpkg-deb --build --root-owner-group "$DEB_PKG" "$DIST/tux-wallpaper_1.0.0_all.deb"
+dpkg-deb --build --root-owner-group "$DEB_PKG" "$DIST/tux-wallpaper_0.1.4_all.deb"

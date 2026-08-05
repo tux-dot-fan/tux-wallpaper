@@ -31,7 +31,7 @@ AppDir:
 
   app_info:
     id: org.tuxdotfan.tuxwallpaper
-    version: "0.1.0"
+    version: "0.1.4"
     name: Tux Wallpaper
     icon: tux-wallpaper
     exec: usr/bin/tux-wallpaper
@@ -43,4 +43,4 @@ AppDir:
 AppImage:
   arch: x86_64
   update-information: type=github|bintray
-  file_name: tux-wallpaper-0.1.0-x86_64.AppImage
+  file_name: tux-wallpaper-0.1.4-x86_64.AppImage
