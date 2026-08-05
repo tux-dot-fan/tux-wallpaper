@@ -1,0 +1,14 @@
+../../bin/tux-wallpaper,sha256=jqHkV3h2BLRftDl093jPyUF56EW3V8Oonddgipi5_KE,253
+data/icons/hicolor/128x128/apps/tux-wallpaper.png,sha256=K5nBLBfFEI04EOu8KLz7-p3777lksyFsgqD7q2PR_GY,1346
+data/icons/hicolor/16x16/apps/tux-wallpaper.png,sha256=c0f-2PkvsnHmM4kkr0ujVdKGOIxCtkjoROXEJZm3UBA,759
+data/icons/hicolor/256x256/apps/tux-wallpaper.png,sha256=PFSHEujoFyh7lqbiNI1_oFsPVBxGfbCxH_MJdE-LolQ,21076
+data/icons/hicolor/32x32/apps/tux-wallpaper.png,sha256=x-r4IfCM_UkclgZksaW596vYG2WUwgy1-J68Ba7ElTY,1834
+data/icons/hicolor/512x512/apps/tux-wallpaper.png,sha256=54oqC4oTsmZzL-v4Nv5HO70n3Vc3pFfTQgACNK3lE9I,59283
+data/icons/hicolor/64x64/apps/tux-wallpaper.png,sha256=CkJYEuXLT19mslFjQUYhw17gfq1eH5u7MSPQziGdzS0,4137
+tux_wallpaper-0.1.0.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4
+tux_wallpaper-0.1.0.dist-info/METADATA,sha256=FpEXGgHucmb7JG-aAkM_HdRgifu3UYJT7B9cSOZ4AaU,5670
+tux_wallpaper-0.1.0.dist-info/RECORD,,
+tux_wallpaper-0.1.0.dist-info/REQUESTED,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0
+tux_wallpaper-0.1.0.dist-info/WHEEL,sha256=lCkmxWfQsSc9CfIClYeavTdQeEX2toPqufh9gI35EQA,87
+tux_wallpaper-0.1.0.dist-info/direct_url.json,sha256=4IReq3MxqNvvGRp7F2196PI1yijhHg2rZ_VEf1YslQU,280
+tux_wallpaper-0.1.0.dist-info/entry_points.txt,sha256=loNqMUoXpw79WQ04-b9ODr6NfriV-YMnowTafhTU5eo,62

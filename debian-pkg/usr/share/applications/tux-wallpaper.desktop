@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Tux Wallpaper
+Comment=Video wallpaper player for Linux
+Exec=tux-wallpaper
+Icon=tux-wallpaper
+Terminal=false
+Type=Application
+Categories=Utility;Video;

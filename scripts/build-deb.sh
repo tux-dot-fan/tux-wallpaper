@@ -14,10 +14,18 @@ mkdir -p "$DEB_PKG/usr/lib/python3/dist-packages"
 mkdir -p "$DEB_PKG/usr/bin"
 mkdir -p "$DEB_PKG/usr/share/applications"
 mkdir -p "$DEB_PKG/usr/share/doc/tux-wallpaper"
+mkdir -p "$DEB_PKG/usr/share/icons/hicolor/16x16/apps"
+mkdir -p "$DEB_PKG/usr/share/icons/hicolor/32x32/apps"
+mkdir -p "$DEB_PKG/usr/share/icons/hicolor/64x64/apps"
+mkdir -p "$DEB_PKG/usr/share/icons/hicolor/128x128/apps"
+mkdir -p "$DEB_PKG/usr/share/icons/hicolor/256x256/apps"
+mkdir -p "$DEB_PKG/usr/share/icons/hicolor/512x512/apps"
 
 # Install wheel into temp dir
 pip3 install --target="$DEB_PKG/usr/lib/python3/dist-packages" \
-    --no-deps --no-build-isolation .
+    --no-deps --no-build-isolation dist/tux_wallpaper-*.whl || \
+pip3 install --target="$DEB_PKG/usr/lib/python3/dist-packages" \
+    --no-deps --no-build-isolation --find-links dist/ tux_wallpaper
 
 # Fix bin path
 if [ -f "$DEB_PKG/usr/lib/python3/dist-packages/bin/tux-wallpaper" ]; then
@@ -35,11 +43,19 @@ cat > "$DEB_PKG/usr/share/applications/tux-wallpaper.desktop" << 'EOF'
 Name=Tux Wallpaper
 Comment=Video wallpaper player for Linux
 Exec=tux-wallpaper
-Icon=/usr/share/icons/hicolor/128x128/apps/vlc.png
+Icon=tux-wallpaper
 Terminal=false
 Type=Application
 Categories=Utility;Video;
 EOF
+
+# Copy icons
+cp tux_wallpaper/data/icons/hicolor/16x16/apps/tux-wallpaper.png "$DEB_PKG/usr/share/icons/hicolor/16x16/apps/"
+cp tux_wallpaper/data/icons/hicolor/32x32/apps/tux-wallpaper.png "$DEB_PKG/usr/share/icons/hicolor/32x32/apps/"
+cp tux_wallpaper/data/icons/hicolor/64x64/apps/tux-wallpaper.png "$DEB_PKG/usr/share/icons/hicolor/64x64/apps/"
+cp tux_wallpaper/data/icons/hicolor/128x128/apps/tux-wallpaper.png "$DEB_PKG/usr/share/icons/hicolor/128x128/apps/"
+cp tux_wallpaper/data/icons/hicolor/256x256/apps/tux-wallpaper.png "$DEB_PKG/usr/share/icons/hicolor/256x256/apps/"
+cp tux_wallpaper/data/icons/hicolor/512x512/apps/tux-wallpaper.png "$DEB_PKG/usr/share/icons/hicolor/512x512/apps/"
 
 # Write copyright
 cat > "$DEB_PKG/usr/share/doc/tux-wallpaper/copyright" << 'EOF'

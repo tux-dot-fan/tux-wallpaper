@@ -26,6 +26,9 @@ dependencies = [
     "pydbus>=0.6",
 ]
 
+[tool.hatch.build.targets.wheel]
+packages = ["tux_wallpaper/data"]
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.3",

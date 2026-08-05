@@ -1,0 +1,6 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Source: https://github.com/tux-dot-fan/tux-wallpaper
+
+Files: *
+Copyright: 2025 Dean
+License: MIT
