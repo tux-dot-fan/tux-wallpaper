@@ -1,10 +1,14 @@
-#!/bin/bash
-set -e
+#!/usr/bin/make -f
 
-# Build the Python package
-cd /tmp
-rm -rf tux-wallpaper-build
-mkdir tux-wallpaper-build
-cd tux-wallpaper-build
+%:
+	dh $@ --with python3
 
-python3 -m build --no-isolation /home/dean/Code/tux-wallpaper 2>&1 | tail -3
+override_dh_auto_build:
+	python3 -m build --no-isolation /home/dean/Code/tux-wallpaper
+
+override_dh_auto_install:
+	# Extract wheel into package staging dir (debian/<pkg>/ = pkg root)
+	mkdir -p debian/tux-wallpaper/usr/lib/python3/dist-packages
+	python3 -m pip install --target=debian/tux-wallpaper/usr/lib/python3/dist-packages \
+		--no-deps --no-build-isolation \
+		/home/dean/Code/tux-wallpaper/dist/tux_wallpaper-0.1.4-py3-none-any.whl

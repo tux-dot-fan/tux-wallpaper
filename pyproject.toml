@@ -27,7 +27,7 @@ dependencies = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["tux_wallpaper/data"]
+packages = ["tux_wallpaper"]
 
 [project.optional-dependencies]
 dev = [
