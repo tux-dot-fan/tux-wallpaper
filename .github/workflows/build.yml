@@ -109,7 +109,9 @@ jobs:
       - name: Build AppImage
         run: |
           pip3 install --break-system-packages appimage-builder
-          python3 -m appimagebuilder --recipe AppImageBuilder.yml --output-dir dist/
+          python3 -m appimagebuilder --recipe AppImageBuilder.yml
+          mkdir -p dist/
+          cp tux-wallpaper-0.1.0-x86_64.AppImage dist/
 
       - name: Upload AppImage artifact
         uses: actions/upload-artifact@v4
