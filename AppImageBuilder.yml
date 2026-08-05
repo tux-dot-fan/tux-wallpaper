@@ -1,0 +1,47 @@
+version: 1
+
+script:
+  - rm -rf AppDir
+  - mkdir -p AppDir/usr/bin
+  - mkdir -p AppDir/usr/lib/python3/dist-packages/tux_wallpaper
+  - mkdir -p AppDir/usr/share/applications
+  - mkdir -p AppDir/usr/share/icons/hicolor/128x128/apps
+  - mkdir -p AppDir/usr/lib/girepository-1.0
+  - cp -r tux_wallpaper/data/icons/hicolor/* AppDir/usr/share/icons/hicolor/
+  - |
+    # Copy tux_wallpaper package, replacing __main__.py with absolute imports version
+    cp -r /usr/lib/python3/dist-packages/tux_wallpaper/* AppDir/usr/lib/python3/dist-packages/tux_wallpaper/
+    cp tux_wallpaper/__main__.py AppDir/usr/lib/python3/dist-packages/tux_wallpaper/__main__.py
+  - gcc -Os -s -o AppDir/usr/bin/tux-wallpaper .ci/tux-wrapper.c
+  - cp tux_wallpaper/data/icons/hicolor/128x128/apps/tux-wallpaper.png AppDir/tux-wallpaper.png
+  - cp /usr/lib/girepository-1.0/*.typelib AppDir/usr/lib/girepository-1.0/ 2>/dev/null || true
+  - |
+    cat > AppDir/usr/share/applications/tux-wallpaper.desktop << 'EOF'
+    [Desktop Entry]
+    Name=Tux Wallpaper
+    Comment=Video wallpaper player for Linux
+    Exec=tux-wallpaper
+    Icon=tux-wallpaper
+    Terminal=false
+    Type=Application
+    Categories=Utility;Video;
+    EOF
+
+AppDir:
+  path: AppDir
+
+  app_info:
+    id: org.tuxdotfan.tuxwallpaper
+    version: "0.1.0"
+    name: Tux Wallpaper
+    icon: tux-wallpaper
+    exec: usr/bin/tux-wallpaper
+    exec_args: "$@"
+
+  runtime:
+    version: v2.0.0
+
+AppImage:
+  arch: x86_64
+  update-information: type=github|bintray
+  file_name: tux-wallpaper-0.1.0-x86_64.AppImage

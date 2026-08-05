@@ -12,7 +12,7 @@ import argparse
 import logging
 import sys
 
-from .player.video_player import VideoPlayer
+from tux_wallpaper.player.video_player import VideoPlayer
 
 LOGGER_NAME = "TuxWallpaper"
 
