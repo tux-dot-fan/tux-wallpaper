@@ -2,15 +2,13 @@ version: 1
 
 script:
   - rm -rf AppDir
-  - mkdir -p AppDir/usr/bin
   - mkdir -p AppDir/usr/lib/python3/dist-packages/tux_wallpaper
   - mkdir -p AppDir/usr/share/applications
   - mkdir -p AppDir/usr/share/icons/hicolor/128x128/apps
-  - mkdir -p AppDir/usr/lib/girepository-1.0
   - cp -r tux_wallpaper/data/icons/hicolor/* AppDir/usr/share/icons/hicolor/
   - |
-    # Copy tux_wallpaper package, replacing __main__.py with absolute imports version
-    cp -r /usr/lib/python3/dist-packages/tux_wallpaper/* AppDir/usr/lib/python3/dist-packages/tux_wallpaper/
+    # Copy tux_wallpaper package from wheel extraction
+    cp -r /tmp/wheel-root/* AppDir/usr/lib/python3/dist-packages/
     cp tux_wallpaper/__main__.py AppDir/usr/lib/python3/dist-packages/tux_wallpaper/__main__.py
   - gcc -Os -s -o AppDir/usr/bin/tux-wallpaper .ci/tux-wrapper.c
   - cp tux_wallpaper/data/icons/hicolor/128x128/apps/tux-wallpaper.png AppDir/tux-wallpaper.png

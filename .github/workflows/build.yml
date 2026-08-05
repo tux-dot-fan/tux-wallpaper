@@ -103,8 +103,11 @@ jobs:
       - name: Build wheel
         run: python3 -m build --wheel --no-isolation --outdir dist/
 
-      - name: Install tux-wallpaper to system Python
-        run: sudo pip3 install --break-system-packages --force-reinstall --no-deps dist/tux_wallpaper-*.whl
+      - name: Extract wheel to temp dir
+        run: |
+          mkdir -p /tmp/wheel-root
+          python3 -m pip install --target=/tmp/wheel-root --no-deps --no-build-isolation dist/tux_wallpaper-*.whl
+          ls /tmp/wheel-root/
 
       - name: Build AppImage
         run: |
@@ -112,12 +115,6 @@ jobs:
           python3 -m appimagebuilder --recipe AppImageBuilder.yml
           mkdir -p dist/
           cp tux-wallpaper-0.1.0-x86_64.AppImage dist/
-
-      - name: Install tux-wallpaper to system Python
-        run: sudo pip3 install --break-system-packages --force-reinstall --no-deps dist/tux_wallpaper-*.whl || true
-
-      - name: Check Python prefix
-        run: python3 -c "import sys; print(sys.prefix)"
 
       - name: Upload AppImage artifact
         uses: actions/upload-artifact@v4
