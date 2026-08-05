@@ -1,4 +1,4 @@
-name: Build Debian Package
+name: Build Debian Package + AppImage
 
 on:
   push:
@@ -75,6 +75,47 @@ jobs:
       - name: Smoke test — imports
         run: python3 -c 'import tux_wallpaper; from tux_wallpaper import commons, utils, config, fade; print("imports ok")'
 
+  build-appimage:
+    needs: build-deb
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download wheel
+        uses: actions/download-artifact@v4
+        with:
+          name: tux-wallpaper-build
+          pattern: "*.whl"
+          path: dist/
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            gcc \
+            python3-gi python3-gi-cairo gir1.2-gtk-3.0 gir1.2-gdkpixbuf-2.0 \
+            gir1.2-pango-1.0 gir1.2-wnck-3.0 gir1.2-ges-1.0 \
+            python3-vlc libgirepository1.0-dev
+
+      - name: Install Python build tools
+        run: pip3 install --break-system-packages build hatchling
+
+      - name: Build wheel
+        run: python3 -m build --wheel --no-isolation --outdir dist/
+
+      - name: Install tux-wallpaper to system Python
+        run: sudo pip3 install --break-system-packages --force-reinstall --no-deps dist/tux_wallpaper-*.whl
+
+      - name: Build AppImage
+        run: python3 -m appimagebuilder --recipe AppImageBuilder.yml --output-dir dist/
+
+      - name: Upload AppImage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tux-wallpaper-appimage
+          path: dist/*.AppImage
+          retention-days: 30
+
   release-deb:
     needs: test-deb
     runs-on: ubuntu-latest
@@ -101,3 +142,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  release-appimage:
+    needs: build-appimage
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    permissions:
+      contents: write
+    steps:
+      - name: Download AppImage
+        uses: actions/download-artifact@v4
+        with:
+          name: tux-wallpaper-appimage
+          path: dist/
+
+      - name: Upload to GitHub Release
+        run: gh release upload ${{ github.ref_name }} dist/*.AppImage --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
