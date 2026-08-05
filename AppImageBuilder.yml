@@ -2,6 +2,7 @@ version: 1
 
 script:
   - rm -rf AppDir
+  - mkdir -p AppDir/usr/bin
   - mkdir -p AppDir/usr/lib/python3/dist-packages/tux_wallpaper
   - mkdir -p AppDir/usr/share/applications
   - mkdir -p AppDir/usr/share/icons/hicolor/128x128/apps
