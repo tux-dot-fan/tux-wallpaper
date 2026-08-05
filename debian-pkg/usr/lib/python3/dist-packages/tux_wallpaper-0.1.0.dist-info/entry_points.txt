@@ -1,2 +1,0 @@
-[console_scripts]
-tux-wallpaper = tux_wallpaper.__main__:main
