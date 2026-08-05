@@ -107,7 +107,9 @@ jobs:
         run: sudo pip3 install --break-system-packages --force-reinstall --no-deps dist/tux_wallpaper-*.whl
 
       - name: Build AppImage
-        run: python3 -m appimagebuilder --recipe AppImageBuilder.yml --output-dir dist/
+        run: |
+          pip3 install --break-system-packages appimage-builder
+          python3 -m appimagebuilder --recipe AppImageBuilder.yml --output-dir dist/
 
       - name: Upload AppImage artifact
         uses: actions/upload-artifact@v4
